@@ -26,66 +26,102 @@ class Puzzle():
     and tracks the game score and remaining symbols.
     """
     def __init__(self, *args):
+        """
+        Initializes the Puzzle instance. If one argument is provided, it's treated as a filename and the puzzle is loaded from the file. 
+        If two arguments are provided, they are treated as grid size and number of symbols left, 
+        and a puzzle grid is generated accordingly.
+        """
         if len(args) == 1:
-            self.__Score = 0
-            self.__SymbolsLeft = 0
-            self.__GridSize = 0
-            self.__Grid = []
-            self.__AllowedPatterns = []
-            self.__AllowedSymbols = []
+            # Initialize core attributes for the puzzle
+            self.__Score = 0           # Score of the puzzle
+            self.__SymbolsLeft = 0     # Number of symbols left to be placed
+            self.__GridSize = 0        # Size of the puzzle grid
+            self.__Grid = []           # List to store cells of the grid
+            self.__AllowedPatterns = []  # List of allowed patterns in the puzzle
+            self.__AllowedSymbols = []   # List of allowed symbols in the puzzle
+
+            # Load the puzzle from a file
             self.__LoadPuzzle(args[0])
+            # If two arguments are provided (grid size and symbols left)
         else:
-            self.__Score = 0
-            self.__SymbolsLeft = args[1]
-            self.__GridSize = args[0]
-            self.__Grid = []
+            # Initialize attributes for a randomly generated puzzle
+            self.__Score = 0             # Score of the puzzle
+            self.__SymbolsLeft = args[1] # Number of symbols left to be placed
+            self.__GridSize = args[0]    # Size of the puzzle grid
+            self.__Grid = []             # List to store cells of the grid
+
+            # Populate the grid with cells (either normal or blocked)
             for Count in range(1, self.__GridSize * self.__GridSize + 1):
                 if random.randrange(1, 101) < 90:
-                    C = Cell()
+                    C = Cell()         # Create a normal cell
                 else:
-                    C = BlockedCell()
-                self.__Grid.append(C)
-            self.__AllowedPatterns = []
-            self.__AllowedSymbols = []
+                    C = BlockedCell()  # Create a blocked cell
+                self.__Grid.append(C)  # Add the cell to the grid
+
+            # Initialize the allowed patterns and symbols for the puzzle
+            self.__AllowedPatterns = []  # List of allowed patterns in the puzzle
+            self.__AllowedSymbols = []   # List of allowed symbols in the puzzle
+
+            # Define specific patterns and add them to the allowed patterns list
             QPattern = Pattern("Q", "QQ**Q**QQ")
             self.__AllowedPatterns.append(QPattern)
             self.__AllowedSymbols.append("Q")
+        
             XPattern = Pattern("X", "X*X*X*X*X")
             self.__AllowedPatterns.append(XPattern)
             self.__AllowedSymbols.append("X")
+            
             TPattern = Pattern("T", "TTT**T**T")
             self.__AllowedPatterns.append(TPattern)
             self.__AllowedSymbols.append("T")
 
     def __LoadPuzzle(self, Filename):
+        """
+        Loads a puzzle from a specified file. The file is expected to have a specific format detailing symbols, patterns, grid size, etc.
+        """
         try:
+            # Open the puzzle file for reading
             with open(Filename) as f:
+                # Read the number of symbols and add them to the allowed symbols list
                 NoOfSymbols = int(f.readline().rstrip())
-                for Count in range (1, NoOfSymbols + 1):
+                for Count in range(1, NoOfSymbols + 1):
                     self.__AllowedSymbols.append(f.readline().rstrip())
+
+                # Read the number of patterns and add them to the allowed patterns list
                 NoOfPatterns = int(f.readline().rstrip())
                 for Count in range(1, NoOfPatterns + 1):
                     Items = f.readline().rstrip().split(",")
                     P = Pattern(Items[0], Items[1])
                     self.__AllowedPatterns.append(P)
+
+                # Set the grid size for the puzzle
                 self.__GridSize = int(f.readline().rstrip())
-                for Count in range (1, self.__GridSize * self.__GridSize + 1):
+
+                # Read each cell's data and create the corresponding cell object
+                for Count in range(1, self.__GridSize * self.__GridSize + 1):
                     Items = f.readline().rstrip().split(",")
                     if Items[0] == "@":
-                        C = BlockedCell()
-                        self.__Grid.append(C)
+                        C = BlockedCell()  # Create a blocked cell if symbol is "@"
                     else:
-                        C = Cell()
-                        C.ChangeSymbolInCell(Items[0])
+                        C = Cell()  # Create a regular cell
+                        C.ChangeSymbolInCell(Items[0])  # Set the cell's symbol
+                        # Add any not allowed symbols for the cell
                         for CurrentSymbol in range(1, len(Items)):
                             C.AddToNotAllowedSymbols(Items[CurrentSymbol])
-                        self.__Grid.append(C)
+                    self.__Grid.append(C)  # Add the cell to the grid
+
+                # Read and set the initial score and symbols left for the puzzle
                 self.__Score = int(f.readline().rstrip())
                 self.__SymbolsLeft = int(f.readline().rstrip())
         except:
+            # Handle any errors that occur during file loading
             print("Puzzle not loaded")
 
     def AttemptPuzzle(self):
+        """
+        Starts the puzzle game. Players input row, column, and symbol to make moves until all symbols are placed. 
+        The method tracks the score and checks for pattern matches after each move.
+        """
         Finished = False
         while not Finished:
             self.DisplayPuzzle()
