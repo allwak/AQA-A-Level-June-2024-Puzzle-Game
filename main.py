@@ -20,6 +20,11 @@ def Main():
         Again = input("Do another puzzle? ").lower()
 
 class Puzzle():
+    """
+    This class represents a puzzle game. It can be initialized with a filename to load a puzzle from a file, 
+    or with size and number of symbols to create a random puzzle. It manages the puzzle grid, checks for matches with patterns, 
+    and tracks the game score and remaining symbols.
+    """
     def __init__(self, *args):
         if len(args) == 1:
             self.__Score = 0
